@@ -1,0 +1,100 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: mimo-forge
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:5432/mimoforge
+    username: ${DB_USER:mimoforge}
+    password: ${DB_PASS:mimoforge}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+
+# ═══════════════════════════════════════════
+#  MiMo API Configuration
+# ═══════════════════════════════════════════
+mimo:
+  api:
+    base-url: https://api.mimo.xiaomi.com/v1
+    api-key: ${MIMO_API_KEY:}
+    # 主推理模型 — MiMo MAX
+    primary-model: MiMo-Max
+    # 多模态模型
+    vision-model: MiMo-VL
+    # 语音合成模型
+    tts-model: MiMo-TTS
+    # 轻量快速模型
+    lite-model: MiMo-Lite
+    timeout: 120s
+    max-retries: 3
+
+  agent:
+    # 最大并发 Agent 数
+    max-concurrent-agents: 50
+    # 单 Agent 最大 Token 预算/任务
+    max-tokens-per-task: 32000
+    # Agent 执行超时
+    task-timeout: 300s
+    # 支持的 Agent 类型
+    types:
+      - REQUIREMENT_ANALYZER
+      - ARCHITECTURE_DESIGNER
+      - CODE_GENERATOR
+      - CODE_REVIEWER
+      - TEST_ENGINEER
+      - DEPLOYMENT_MANAGER
+      - DOCUMENTATION_WRITER
+      - SECURITY_AUDITOR
+
+  rag:
+    # Milvus 向量数据库
+    milvus:
+      host: ${MILVUS_HOST:localhost}
+      port: 19530
+      collection: mimo_forge_knowledge
+    # 嵌入维度
+    embedding-dim: 4096
+    # 检索 Top-K
+    top-k: 10
+    # 最小相关度阈值
+    min-score: 0.7
+
+  mcp:
+    # MCP 服务器配置
+    servers:
+      - name: filesystem
+        transport: stdio
+        command: mcp-server-filesystem
+      - name: github
+        transport: stdio
+        command: mcp-server-github
+      - name: playwright
+        transport: stdio
+        command: mcp-server-playwright
+
+# ═══════════════════════════════════════════
+#  Token Usage Monitoring
+# ═══════════════════════════════════════════
+token-usage:
+  enabled: true
+  # 日消耗预警阈值
+  daily-alert-threshold: 5000000
+  # 月消耗预警阈值
+  monthly-alert-threshold: 100000000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.mimoforge: DEBUG
+    dev.langchain4j: INFO

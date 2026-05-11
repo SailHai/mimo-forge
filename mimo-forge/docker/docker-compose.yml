@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+  # ═══ MiMo Forge 应用 ═══
+  mimo-forge:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports: ["8080:8080"]
+    environment:
+      MIMO_API_KEY: ${MIMO_API_KEY}
+      DB_HOST: postgres
+      REDIS_HOST: redis
+      MILVUS_HOST: milvus
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+
+  # ═══ PostgreSQL ═══
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: mimoforge
+      POSTGRES_USER: mimoforge
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mimoforge}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mimoforge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ═══ Redis ═══
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ═══ Milvus (向量数据库) ═══
+  milvus:
+    image: milvusdb/milvus:v2.5-latest
+    ports: ["19530:19530"]
+    environment:
+      ETCD_USE_EMBED: "true"
+      COMMON_STORAGETYPE: local
+    volumes: ["milvus:/var/lib/milvus"]
+
+  # ═══ Prometheus 监控 ═══
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  # ═══ Grafana 可视化 ═══
+  grafana:
+    image: grafana/grafana:latest
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on: [prometheus]
+
+volumes:
+  pgdata:
+  milvus:

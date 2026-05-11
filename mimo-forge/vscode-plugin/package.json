@@ -1,0 +1,60 @@
+{
+  "name": "mimo-forge-vscode",
+  "displayName": "MiMo Forge - AI Agent IDE",
+  "description": "AI-powered coding assistant powered by Xiaomi MiMo V2.5",
+  "version": "1.0.0",
+  "publisher": "mimoforge",
+  "engines": { "vscode": "^1.96.0" },
+  "categories": ["AI", "Programming Languages", "Linters"],
+  "keywords": ["mimo", "xiaomi", "ai", "agent", "code-completion", "llm"],
+  "activationEvents": ["onLanguage:typescript", "onLanguage:java", "onLanguage:python"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "mimo.chat", "title": "MiMo: AI Chat", "icon": "$(comment-discussion)" },
+      { "command": "mimo.explain", "title": "MiMo: Explain Code", "icon": "$(book)" },
+      { "command": "mimo.refactor", "title": "MiMo: Refactor Code", "icon": "$(wrench)" },
+      { "command": "mimo.review", "title": "MiMo: Code Review", "icon": "$(checklist)" },
+      { "command": "mimo.generate", "title": "MiMo: Generate Code", "icon": "$(spark)" },
+      { "command": "mimo.agent.pipeline", "title": "MiMo: Run Agent Pipeline", "icon": "$(play)" },
+      { "command": "mimo.rag.query", "title": "MiMo: Search Knowledge Base", "icon": "$(search)" }
+    ],
+    "configuration": {
+      "title": "MiMo Forge",
+      "properties": {
+        "mimo.apiKey": { "type": "string", "description": "MiMo API Key", "scope": "machine" },
+        "mimo.model": {
+          "type": "string",
+          "default": "MiMo-Max",
+          "enum": ["MiMo-Max", "MiMo-Lite", "MiMo-VL"],
+          "description": "Default model for AI operations"
+        },
+        "mimo.maxTokens": { "type": "number", "default": 8192, "description": "Max output tokens" },
+        "mimo.temperature": { "type": "number", "default": 0.3, "description": "Temperature (0-1)" },
+        "mimo.enableInlineCompletion": { "type": "boolean", "default": true, "description": "Enable inline code completion" },
+        "mimo.serverUrl": { "type": "string", "default": "https://api.mimo.xiaomi.com/v1", "description": "MiMo API Server URL" }
+      }
+    },
+    "menus": {
+      "editor/context": [
+        { "command": "mimo.explain", "when": "editorHasSelection", "group": "mimo@1" },
+        { "command": "mimo.refactor", "when": "editorHasSelection", "group": "mimo@2" },
+        { "command": "mimo.review", "when": "editorHasSelection", "group": "mimo@3" }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "@vscode/vsce": "^3.2.0"
+  },
+  "dependencies": {
+    "openai": "^4.80.0"
+  }
+}
